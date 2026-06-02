@@ -23,7 +23,7 @@ RUN npm ci
 COPY . .
 
 # Expose your server port (Render requires a web service to bind to a port)
-EXPOSE 3000
+EXPOSE 10000
 
 
 #run server.js
