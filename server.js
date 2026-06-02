@@ -7,8 +7,8 @@ const qrcode = require('qrcode-terminal');
 process.env.UV_THREADPOOL_SIZE = 16;
 
 
-const odbc = require('odbc');
-const connectionString = 'DSN=Finesse Msg Data;MaintainConnection=False;';
+//const odbc = require('odbc');
+//const connectionString = 'DSN=Finesse Msg Data;MaintainConnection=False;';
 
        
 
@@ -117,6 +117,7 @@ client.on('ready', async () => {
     }, 5000)
     */
 
+    /*
     setInterval(async () => {
 
       // Establish connection
@@ -183,6 +184,7 @@ client.on('ready', async () => {
 
 
     }, 5000);
+    */
 
 
     
