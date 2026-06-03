@@ -85,6 +85,7 @@ client.on('ready', async () => {
     //connection = await odbc.connect(connectionString);
 
 
+    /*
     (async () => {
       const fs = (await import('node:fs')).default;
       // Get your image buffer (e.g., from a file or network request)
@@ -102,7 +103,7 @@ client.on('ready', async () => {
 
 
     const media = MessageMedia.fromFilePath('lake.jpg');
-
+    */
 
     /*
     setInterval(() => {
