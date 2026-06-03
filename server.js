@@ -1,7 +1,8 @@
 // Import required modules
 const { Client, LocalAuth } = require('whatsapp-web.js');
 //const axios = require('axios');
-const qrcode = require('qrcode-terminal');
+const qrcodeTerminal = require('qrcode-terminal');
+const qrcode = require('qrcode');
 const express = require('express');
 
 // Set the UV_THREADPOOL_SIZE for the native C++ odbc driver
@@ -93,7 +94,7 @@ const client = new Client({
 // Generate QR code in terminal for authentication
 client.on('qr', qr => {
     //console.log('Scan this QR code with your WhatsApp:');
-    //qrcode.generate(qr, { small: true });
+    //qrcodeTerminal.generate(qr, { small: true });
 
     console.log('New QR Code generated.');
     latestQrString = qr; // Save the raw text string
