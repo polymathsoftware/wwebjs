@@ -91,7 +91,7 @@ const client = new Client({
 
 
 // Generate QR code in terminal for authentication
-client.on('qr', qr => {
+client.once('qr', qr => {
     //console.log('Scan this QR code with your WhatsApp:');
     //qrcodeTerminal.generate(qr, { small: true });
 
