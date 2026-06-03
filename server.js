@@ -7,6 +7,16 @@ const express = require('express');
 // Set the UV_THREADPOOL_SIZE for the native C++ odbc driver
 process.env.UV_THREADPOOL_SIZE = 16;
 
+const app = express();
+
+// 1. Retrieve the port dynamically provided by Render, defaulting to 10000
+const PORT = process.env.PORT || 10000;
+
+// 2. Add a simple health check endpoint for Render's scanner
+app.get('/', (req, res) => {
+    res.send('WhatsApp Bot is running!');
+});
+
 
 
 
@@ -200,6 +210,14 @@ client.on('ready', async () => {
     } )
     .then(() => console.log(' Message sent successfully!'))
     .catch(err => console.error('Error sending message:', err));
+
+
+    // 3. Bind the server to 0.0.0.0 as required by Render
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`HTTP server tracking health checks on port ${PORT}`);
+    });
+
+
 });
 
 // Handle authentication success
@@ -321,20 +339,6 @@ client.on('message', async (msg) => {
 client.initialize();
 
 
-const app = express();
-
-// 1. Retrieve the port dynamically provided by Render, defaulting to 10000
-const PORT = process.env.PORT || 10000;
-
-// 2. Add a simple health check endpoint for Render's scanner
-app.get('/', (req, res) => {
-    res.send('WhatsApp Bot is running!');
-});
-
-// 3. Bind the server to 0.0.0.0 as required by Render
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`HTTP server tracking health checks on port ${PORT}`);
-});
 
 
 async function runTaskLoop() {
