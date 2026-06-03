@@ -70,6 +70,13 @@ app.get('/qr', async (req, res) => {
 // Create a new client instance with local authentication
 const client = new Client({
     authStrategy: new LocalAuth(), // Saves session so you don't scan QR every time
+
+    /*
+    webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+    },
+    */
     
     puppeteer: {
       headless: true,
