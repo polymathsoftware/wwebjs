@@ -60,7 +60,7 @@ app.get('/qr', async (req, res) => {
           </html>
       `);
   } catch (err) {
-      res.status(500).send('Error generating QR code image');
+      res.status(500).send(`Error generating QR code image: ${err}` );
   }
 });
 
