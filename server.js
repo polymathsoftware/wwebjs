@@ -18,6 +18,10 @@ app.get('/', (req, res) => {
 });
 
 
+// 3. Bind the server to 0.0.0.0 as required by Render
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP server tracking health checks on port ${PORT}`);
+});
 
 
 //const odbc = require('odbc');
