@@ -46,7 +46,7 @@ app.get('/qr', async (req, res) => {
           <html>
           <head>
               <title>WhatsApp Web Login</title>
-              <meta http-equiv="refresh" content="15"> <!-- Autorefreshes page every 15s to fetch updated QR codes -->
+              <!--<meta http-equiv="refresh" content="15">--> <!-- Autorefreshes page every 15s to fetch updated QR codes -->
               <style>
                   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
                   img { margin-top: 20px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); padding: 10px; }
