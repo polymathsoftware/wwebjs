@@ -1,11 +1,16 @@
 // Import required modules
-const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const axios = require('axios');
+const { Client, LocalAuth } = require('whatsapp-web.js');
+//const axios = require('axios');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
 
 // Set the UV_THREADPOOL_SIZE for the native C++ odbc driver
-process.env.UV_THREADPOOL_SIZE = 16;
+//process.env.UV_THREADPOOL_SIZE = 16;
+
+
+// Global variable to hold the latest QR code string
+let latestQrString = null;
+let isReady = false;
 
 const app = express();
 
@@ -17,25 +22,47 @@ app.get('/', (req, res) => {
     res.send('WhatsApp Bot is running!');
 });
 
-/*
-// 3. Bind the server to 0.0.0.0 as required by Render
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`HTTP server tracking health checks on port ${PORT}`);
+
+// 3. Web endpoint to display the QR Code to users
+app.get('/qr', async (req, res) => {
+  if (isReady) {
+      return res.send('<h1>WhatsApp is already authenticated and connected!</h1>');
+  }
+
+  if (!latestQrString) {
+      return res.send('<h1>QR code is generating, please refresh in a few seconds...</h1>');
+  }
+
+  try {
+      // Convert the QR text string into a Data URL (base64 encoded image)
+      const qrImageDataUrl = await qrcode.toDataURL(latestQrString);
+      
+      // Serve a simple HTML page displaying the QR code image
+      res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>WhatsApp Web Login</title>
+              <meta http-equiv="refresh" content="15"> <!-- Autorefreshes page every 15s to fetch updated QR codes -->
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  img { margin-top: 20px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); padding: 10px; }
+              </style>
+          </head>
+          <body>
+              <h1>Scan this QR code with WhatsApp</h1>
+              <p>The page will auto-refresh every 15 seconds to fetch new codes if this one expires.</p>
+              <img src="${qrImageDataUrl}" alt="WhatsApp QR Code" />
+          </body>
+          </html>
+      `);
+  } catch (err) {
+      res.status(500).send('Error generating QR code image');
+  }
 });
-*/
 
 
-//const odbc = require('odbc');
-//const connectionString = 'DSN=Finesse Msg Data;MaintainConnection=False;';
 
-       
-
-
-//const termImage =require('term-img');
-//const supportsTerminalGraphics = require('supports-terminal-graphics');
-//const terminalImage = require('terminal-image'); //terminal-image@1.2.1
-
-let lastcontent = '', content, connection, lastsmsid = 70, smsid;
 
 // Create a new client instance with local authentication
 const client = new Client({
@@ -62,8 +89,12 @@ const client = new Client({
 
 // Generate QR code in terminal for authentication
 client.on('qr', qr => {
-    console.log('Scan this QR code with your WhatsApp:');
-    qrcode.generate(qr, { small: true });
+    //console.log('Scan this QR code with your WhatsApp:');
+    //qrcode.generate(qr, { small: true });
+
+    console.log('New QR Code generated.');
+    latestQrString = qr; // Save the raw text string
+
 });
 
 
@@ -73,10 +104,13 @@ client.on('qr', qr => {
 client.on('ready', async () => {
     console.log('✅ WhatsApp Web client is ready!' );
 
+    latestQrString = null; // Clear QR code once authenticated
+    isReady = true;
+
     // 3. Bind the server to 0.0.0.0 as required by Render
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`HTTP server tracking health checks on port ${PORT}`);
-    });
+    //app.listen(PORT, '0.0.0.0', () => {
+    //  console.log(`HTTP server tracking health checks on port ${PORT}`);
+    //});
 
 
 });
@@ -107,4 +141,12 @@ client.on('message', async (msg) => {
 
 // Start the client
 client.initialize();
+
+
+
+// 3. Bind the server to 0.0.0.0 as required by Render
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP server tracking health checks on port ${PORT}`);
+});
+
 
