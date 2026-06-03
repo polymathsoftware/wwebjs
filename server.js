@@ -55,8 +55,7 @@ app.get('/qr', async (req, res) => {
           <body>
               <h1>Scan this QR code with WhatsApp</h1>
               <p>The page will auto-refresh every 15 seconds to fetch new codes if this one expires.</p>
-              <!--<img src="{qrImageDataUrl}" alt="WhatsApp QR Code" />-->
-              <p>${qrImageDataUrl}</p>
+              <img src="${qrImageDataUrl}" alt="WhatsApp QR Code" />
           </body>
           </html>
       `);
