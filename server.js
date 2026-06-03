@@ -37,7 +37,7 @@ app.get('/qr', async (req, res) => {
 
   try {
       // Convert the QR text string into a Data URL (base64 encoded image)
-      //const qrImageDataUrl = await qrcode.toDataURL(latestQrString);
+      const qrImageDataUrl = await qrcode.toDataURL(latestQrString);
       
       // Serve a simple HTML page displaying the QR code image
       res.send(`
@@ -55,7 +55,7 @@ app.get('/qr', async (req, res) => {
               <h1>Scan this QR code with WhatsApp</h1>
               <p>The page will auto-refresh every 15 seconds to fetch new codes if this one expires.</p>
               <!--<img src="{qrImageDataUrl}" alt="WhatsApp QR Code" />-->
-              <p>${latestQrString}</p>
+              <p>${qrImageDataUrl}</p>
           </body>
           </html>
       `);
