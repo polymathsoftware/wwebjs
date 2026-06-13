@@ -34,8 +34,8 @@ function createClient() {
     client.on('qr', (qr) => {
         console.log('QR RECEIVED. Please scan if unauthenticated.');
         //qrcodeTerminal.generate(qr, { small: true });
-        console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
-          'New QR Code generated.');
+        //console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
+        //  'New QR Code generated.');
         latestQrString = qr; // Save the raw text string
 
     });
