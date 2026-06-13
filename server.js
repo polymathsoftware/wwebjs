@@ -45,7 +45,7 @@ function createClient() {
         latestQrString = null; // Clear QR code once authenticated
         isInitializing = false;
 
-        /*
+        
         const chatId = '919843138190' + '@c.us';
         client.sendMessage(chatId, media, {
           caption: 'Hello from whatsapp-web.js! ' + new Date()
@@ -53,7 +53,7 @@ function createClient() {
         .then(() => {
           console.log('Message sent.')
         })
-          */
+        
 
         startHeartbeat(); // Start checking connection health
     });
