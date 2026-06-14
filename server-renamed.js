@@ -13,7 +13,7 @@ const mysql = require('mysql2/promise'); // npm install mysql2
 
 // Global variable to hold the latest QR code string
 let latestQrString = null;
-const authtype = 'local';
+const authtype = 'remote';
 let client;
 let isReady = false;
 
@@ -33,7 +33,11 @@ if(authtype === 'remote') {
 
   pool.query('SELECT * FROM tabsquare')
   .then(result => {
-    console.log('result', result);
+    console.log('remote mysql tabsquare', result);
+  });
+  pool.query('SELECT * FROM wsp_sessions')
+  .then(result => {
+    console.log('remote mysql wsp_sessions', result);
   });
   //console.log('pool', pool);
   //const store = new MysqlStore({ pool });
@@ -69,8 +73,8 @@ if(authtype === 'remote') {
   authStrategy = new RemoteAuth({
     clientId: 'my-session',
     store: store,
-    backupSyncIntervalMs: 300000 
-    });
+    backupSyncIntervalMs: 120000 
+  });
   console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
     'RemoteAuth');
 } else {
@@ -155,11 +159,11 @@ app.get('/pdf', (req, res) => {
 // 3. Web endpoint to display the QR Code to users
 app.get('/qr', async (req, res) => {
   if (isReady) {
-      return res.send('<h1>WhatsApp is already authenticated and connected!</h1>');
+      return res.send('<meta http-equiv="refresh" content="15"><h1>WhatsApp is already authenticated and connected!</h1>');
   }
 
   if (!latestQrString) {
-      return res.send('<h1>QR code is generating, please refresh in a few seconds...</h1>');
+      return res.send('<meta http-equiv="refresh" content="15"><h1>QR code is generating, please refresh in a few seconds...</h1>');
   }
 
 

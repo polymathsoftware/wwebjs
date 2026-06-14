@@ -1,15 +1,126 @@
-const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const { Client, LocalAuth, RemoteAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const qrcode = require('qrcode');
 const express = require('express');
+const { MysqlStore } = require('wwebjs-mysql');
+const mysql = require('mysql2/promise'); // npm install mysql2
+
 
 let client;
 let isInitializing = false;
 let heartbeatInterval;
 let latestQrString = null;
+let authtype = 'remote';
 
 const media = MessageMedia.fromFilePath('lake.jpg');
 
+let authStrategy, pool, connection, tableInfo, store, endpoint;
+if(authtype === 'remote') {
+
+  // 1. Setup MySQL Store
+  pool = mysql.createPool({
+    host: 'db53126.public.databaseasp.net',
+    user: 'db53126',
+    password: 'bJ?27%eP#S3w',
+    database: 'db53126',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
+
+  pool.query('SELECT * FROM tabsquare')
+  .then(result => {
+    console.log('result', result);
+  });
+  pool.query('SELECT * FROM wsp_sessions')
+  .then(result => {
+    console.log('result', result);
+  });
+  //console.log('pool', pool);
+  //const store = new MysqlStore({ pool });
+
+  // 1. Create your database connection
+  connection = mysql.createConnection({
+    host: 'db53126.public.databaseasp.net',
+    user: 'db53126',
+    password: 'bJ?27%eP#S3w',
+    database: 'db53126',
+  });
+
+  // 2. Define your table and column mappings
+  tableInfo = {
+    table: 'wsp_sessions', // Your custom table name
+    session_column: 'session_name',
+    data_column: 'data',
+    updated_at_column: 'updated_at'
+  };
+
+  // 3. Initialize the store
+  store = new MysqlStore({
+    pool: pool,
+    tableInfo: tableInfo
+  });
+
+  //console.log('store', store);
+
+
+}
+
+if(authtype === 'remote') {
+  authStrategy = new RemoteAuth({
+    clientId: 'my-session',
+    store: store,
+    backupSyncIntervalMs: 120000 
+    });
+  console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
+    'RemoteAuth');
+} else {
+  authStrategy = new LocalAuth();
+  console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
+    authtype);
+
+}
+
+function createClient() {
+    if (isInitializing) return;
+    isInitializing = true;
+
+    console.log('Initializing WhatsApp client...');
+
+    client = new Client({
+        authStrategy: authStrategy, // Saves session so you don't scan QR every time
+
+        
+        //webVersionCache: {
+        //    type: 'remote',
+        //    remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+        //},
+        
+        ...[authtype === 'remote'? [{
+            puppeteer: {
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    // Crucial flags to prevent Chrome from freezing when backgrounded or asleep:
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding'
+                    ]
+            },
+            // Points to the Chromium binary installed via Docker
+            //executablePath: '/usr/bin/chromium-browser' 
+            browserWSEndpoint: 'wss://production-lon.browserless.io?token=2UY988BIFnO7yP77b63beb978f99f2080913d812db7427077'
+          }
+        ]: [{
+              args: [ '--no-sandbox', '--disable-setuid-sandbox', '--disable-backgrounding-occluded-windows' ]
+            }
+        ]]
+    });
+
+
+
+/*
 function createClient() {
     if (isInitializing) return;
     isInitializing = true;
@@ -30,6 +141,9 @@ function createClient() {
             ]
         }
     });
+}
+
+*/
 
     client.on('qr', (qr) => {
         console.log('QR RECEIVED. Please scan if unauthenticated.');
@@ -58,6 +172,12 @@ function createClient() {
         startHeartbeat(); // Start checking connection health
     });
 
+    
+    client.on('remote_session_saved', () => {
+      console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
+        'Session saved successfully to remote MySQL');
+    });
+
     client.on('disconnected', async (reason) => {
         console.log(`Client was disconnected: ${reason}. Attempting restart...`);
         stopHeartbeat();
@@ -71,6 +191,8 @@ function createClient() {
         await handleRestart();
     });
 }
+
+
 
 async function handleRestart() {
     stopHeartbeat();
@@ -208,11 +330,11 @@ app.get('/message', (req, res) => {
 // 3. Web endpoint to display the QR Code to users
 app.get('/qr', async (req, res) => {
   if (!isInitializing) {
-      return res.send('<h1>WhatsApp is already authenticated and connected!</h1>');
+      return res.send('<meta http-equiv="refresh" content="15"><h1>WhatsApp is already authenticated and connected!</h1>');
   }
 
   if (!latestQrString) {
-      return res.send('<h1>QR code is generating, please refresh in a few seconds...</h1>');
+      return res.send('<meta http-equiv="refresh" content="15"><h1>QR code is generating, please refresh in a few seconds...</h1>');
   }
 
 
