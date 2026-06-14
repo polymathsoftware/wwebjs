@@ -12,6 +12,16 @@ let heartbeatInterval;
 let latestQrString = null;
 let authtype = 'remote';
 
+const fs = require('fs');
+const path = require('path');
+
+const authPath = path.join(__dirname, '.wwebjs_auth');
+
+// Automatically create the directory if it doesn't exist
+if (!fs.existsSync(authPath)) {
+    fs.mkdirSync(authPath, { recursive: true });
+}
+
 const media = MessageMedia.fromFilePath('lake.jpg');
 
 let authStrategy, pool, connection, tableInfo, store, endpoint;
@@ -70,8 +80,9 @@ if(authtype === 'remote') {
   authStrategy = new RemoteAuth({
     clientId: 'my-session',
     store: store,
-    backupSyncIntervalMs: 120000 
-    });
+    backupSyncIntervalMs: 120000 ,
+    dataPath: authPath // Forces the client to use the directory we checked/created above
+});
   console.log(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), 
     'RemoteAuth');
 } else {
@@ -110,7 +121,7 @@ function createClient() {
             },
             // Points to the Chromium binary installed via Docker
             //executablePath: '/usr/bin/chromium-browser' 
-            browserWSEndpoint: 'wss://production-lon.browserless.io?token=2UY988BIFnO7yP77b63beb978f99f2080913d812db7427077'
+            //browserWSEndpoint: 'wss://production-lon.browserless.io?token=2UY988BIFnO7yP77b63beb978f99f2080913d812db7427077'
           }
         ]: [{
               args: [ '--no-sandbox', '--disable-setuid-sandbox', '--disable-backgrounding-occluded-windows' ]
